@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "734674759653",
+    "project_id": "project--250192099526852021"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:734674759653:android:59e551d63041c043",
+        "android_client_info": {
+          "package_name": "in.askdial.testgooglesheets"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "734674759653-9qif9sqgbbdrermvd148d4i2r4vqq483.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.askdial.testgooglesheets",
+            "certificate_hash": "09A78EAE1BEC1F18A38BA431E1AD00706D5E2932"
+          }
+        },
+        {
+          "client_id": "734674759653-amf6ceglru3ifhmp8070t1s845669gaq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoOHEhAkNTs_dlif8Lx5AGpSGzr_qb3r0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
