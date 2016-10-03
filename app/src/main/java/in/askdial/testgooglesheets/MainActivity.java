@@ -1,6 +1,7 @@
 package in.askdial.testgooglesheets;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,20 +16,26 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener {
+    public static final String PREFS_NAME = "MyPrefsFile";
     private static final int RC_SIGN_IN = 007;
     private GoogleApiClient mGoogleApiClient;
     SignInButton signInButton;
     Button signoutbtn;
     TextView tvnametxt, tvname, tvemailtxt, tvemail;
     ImageView profileimage;
+    SharedPreferences settings;
+    SharedPreferences.Editor editor;
+    String Name="", Email="", Image="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope(Scopes.PLUS_LOGIN))
                 .requestEmail()
                 .build();
 
@@ -54,11 +62,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         profileimage = (ImageView) findViewById(R.id.imageView);
 
+        settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        editor = settings.edit();
+
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setScopes(gso.getScopeArray());
 
         signInButton.setOnClickListener(this);
         signoutbtn.setOnClickListener(this);
+
+        boolean result = settings.getBoolean("signin", false);
+        Log.d("debug", "Result: "+result);
+
+        if (result == false) {
+            updateUI(false, settings.getString("Name", ""), settings.getString("email", ""), settings.getString("profileimage", ""));
+        } else {
+            updateUI(true, settings.getString("Name", ""), settings.getString("email", ""), settings.getString("profileimage", ""));
+        }
     }
 
     @Override
@@ -100,13 +120,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
-            tvname.setText(acct.getDisplayName());
-            tvemail.setText(acct.getEmail());
-            Picasso.with(MainActivity.this).load(acct.getPhotoUrl().toString()).into(profileimage);
-            updateUI(true);
+            Name = acct.getDisplayName();
+            editor.putString("Name", Name);
+            editor.putString("email", acct.getEmail());
+            Image = acct.getPhotoUrl().toString();
+            editor.putString("profileimage", Image);
+            editor.putBoolean("signin", true);
+            editor.commit();
+            updateUI(true, settings.getString("Name", ""), settings.getString("email", ""), settings.getString("profileimage", ""));
         } else {
             // Signed out, show unauthenticated UI.
-            updateUI(false);
+            editor.putString("Name", "");
+            editor.putString("email", "");
+            editor.putString("profileimage", "");
+            editor.putBoolean("signin", false);
+            editor.commit();
+            updateUI(false, settings.getString("Name", ""), settings.getString("email", ""), settings.getString("profileimage", ""));
         }
     }
 
@@ -115,13 +144,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
-                        updateUI(false);
+                        editor.putString("Name", "");
+                        editor.putString("email", "");
+                        editor.putString("profileimage", "");
+                        editor.putBoolean("signin", false);
+                        editor.commit();
+                        updateUI(false, settings.getString("Name", ""), settings.getString("email", ""),
+                                settings.getString("profileimage", ""));
                     }
                 });
     }
 
-    private void updateUI(boolean value) {
+    private void updateUI(boolean value, String name, String email, String image) {
         if (value) {
+            tvname.setText(name);
+            tvemail.setText(email);
+            Picasso.with(MainActivity.this).load(image).into(profileimage);
             profileimage.setVisibility(View.VISIBLE);
             tvnametxt.setVisibility(View.VISIBLE);
             tvname.setVisibility(View.VISIBLE);
